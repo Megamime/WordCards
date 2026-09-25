@@ -33,6 +33,7 @@ h3{margin:20px 0 4px;font-size:16px}
 <body>
 <nav id="nav"></nav>
 <main id="m"></main>
+<script src="oxford3000.js"></script>
 <script>
 const K='kk1',DAY=864e5;
 let S={cards:[],lim:10,nd:{k:0,n:0}},tab='s',cur=null,shown=false,msg='',ok=true;
@@ -67,6 +68,10 @@ function ex(){const t=JSON.stringify(S);$('bk').value=t;$('bk').select();
  try{navigator.clipboard.writeText(t).then(()=>note('Kopyalandı. Bir notlar uygulamasına yapıştırıp sakla.'),()=>note('Metni elle kopyala.'))}catch(e){note('Metni elle kopyala.')}}
 function im2(){try{const o=JSON.parse($('bk').value);if(!Array.isArray(o.cards))throw 0;S=Object.assign({cards:[],lim:10,nd:{k:0,n:0}},o);save();note(S.cards.length+' kart yüklendi.');render()}catch(e){note('Yedek okunamadı. Metnin tamamını yapıştırdığından emin ol.')}}
 function wipe(){if(!wipe.a){wipe.a=1;note('Emin misin? Silmek için tekrar dokun.');return}wipe.a=0;S.cards=[];save();note('Tüm kartlar silindi.');render()}
+function loadOx(){if(typeof OXFORD3000=='undefined'){note('Kelime listesi dosyası bulunamadı.');return}
+ const seen=new Set(S.cards.map(c=>c.f.toLowerCase()));let a=0,d=0;
+ OXFORD3000.forEach(([f,b])=>{if(seen.has(f.toLowerCase())){d++;return}seen.add(f.toLowerCase());S.cards.push(mk(f,b));a++});
+ save();note(a+' kelime eklendi'+(d?', '+d+' zaten vardı':'')+'.');render()}
 function render(){
  $('nav').innerHTML=[['s','Çalış'],['a','Ekle'],['x','Ayarlar']].map(([k,t])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';msg='';wipe.a=0;cur=null;shown=false;render()">${t}</button>`).join('');
  const m=$('m');
@@ -82,7 +87,7 @@ function render(){
   m.innerHTML=`<h3>Tek kart ekle</h3><input id="f" placeholder="İngilizce (apple)" autocapitalize="off" autocomplete="off"><input id="b" placeholder="Türkçesi (elma)" autocomplete="off"><button class="p" onclick="add1()">Kartı ekle</button><h3>Toplu ekle</h3><p class="mut">Her satıra bir kart yaz: kelime ; anlam. Ayırıcı olarak ; ya da tab kullanabilirsin.</p><textarea id="t" placeholder="apple ; elma"></textarea><button class="p" onclick="imp()">İçe aktar</button><p class="mut">${esc(msg)}</p>`;
  else{
   const st=S.cards.reduce((a,c)=>(a[c.s==0?0:(c.s==1||c.i<21)?1:2]++,a),[0,0,0]);
-  m.innerHTML=`<h3>Günlük yeni kart sayısı</h3><input type="number" inputmode="numeric" min="1" max="100" value="${S.lim}" onchange="S.lim=Math.max(1,Math.min(100,+this.value||10));save()"><p class="mut">${S.cards.length} kart: ${st[0]} yeni, ${st[1]} öğreniliyor, ${st[2]} olgun (21+ gün).</p><h3>Yedek</h3><p class="mut">Kartların bu tarayıcıda saklanır. Ara sıra yedeği kopyalayıp bir notlar uygulamasına yapıştır.</p><textarea id="bk" placeholder="Yedek burada görünür. Geri yüklemek için yedeği buraya yapıştır."></textarea><div class="row"><button onclick="ex()">Yedeği göster</button><button onclick="im2()">Yedekten yükle</button></div><p class="mut" id="nt">${esc(msg)}</p><button onclick="wipe()" style="width:100%">Tüm kartları sil</button>`}
+  m.innerHTML=`<h3>Günlük yeni kart sayısı</h3><input type="number" inputmode="numeric" min="1" max="100" value="${S.lim}" onchange="S.lim=Math.max(1,Math.min(100,+this.value||10));save()"><p class="mut">${S.cards.length} kart: ${st[0]} yeni, ${st[1]} öğreniliyor, ${st[2]} olgun (21+ gün).</p><h3>Oxford 3000 listesi</h3><p class="mut">Temel 3000 İngilizce kelimeyi Türkçe anlamıyla desteye ekler; günlük yeni kart sayına göre azar azar karşına çıkar.</p><button class="p" onclick="loadOx()">Oxford 3000'i yükle</button><h3>Yedek</h3><p class="mut">Kartların bu tarayıcıda saklanır. Ara sıra yedeği kopyalayıp bir notlar uygulamasına yapıştır.</p><textarea id="bk" placeholder="Yedek burada görünür. Geri yüklemek için yedeği buraya yapıştır."></textarea><div class="row"><button onclick="ex()">Yedeği göster</button><button onclick="im2()">Yedekten yükle</button></div><p class="mut" id="nt">${esc(msg)}</p><button onclick="wipe()" style="width:100%">Tüm kartları sil</button>`}
 }
 render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

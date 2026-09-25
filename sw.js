@@ -1,5 +1,5 @@
-const CACHE = 'kelime-kartlari-v1';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'kelime-kartlari-v2';
+const ASSETS = ['./', './index.html', './manifest.json', './oxford3000.js', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
